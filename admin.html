@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin – Projets de soutenance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout : une colonne centrée, en-tête bleu UNC, carte de formulaire en sections numérotées */
+  :root {
+    --navy: #1F3864; --navy-2: #2B4C85; --gold: #C8962E;
+    --bg: #F3F5F9; --card: #FFFFFF; --fg: #1A2233; --muted: #5B6578;
+    --line: #DCE1EA; --field: #FBFCFE; --ok: #2F7A4A; --ok-bg: #E5F3EA;
+    --err: #A33030; --err-bg: #FBE9E9;
+    --display: 'Lexend', 'Segoe UI', system-ui, sans-serif;
+    --body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F1522; --card: #172033; --fg: #E6EAF2; --muted: #9AA4B8;
+      --line: #2A3650; --field: #111A2A; --ok: #7FD39C; --ok-bg: #16301F;
+      --err: #F08A8A; --err-bg: #3A1A1A; --navy-2: #8FB0EE; color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+  header { background: var(--navy); color: #fff; padding: 28px 16px 64px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .eyebrow { font: 600 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  h1 { font: 700 clamp(24px, 5vw, 32px)/1.15 var(--display); margin: 10px 0 8px; text-wrap: balance; }
+  header p { margin: 0; color: #C9D3E6; max-width: 60ch; }
+  main { padding: 0 16px 48px; margin-top: -40px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 28px rgba(15,25,50,.08); }
+  form, .panel { padding: 8px 28px 28px; }
+  fieldset { border: 0; margin: 0; padding: 22px 0 6px; border-bottom: 1px solid var(--line); }
+  fieldset:last-of-type { border-bottom: 0; }
+  legend { display: flex; align-items: center; gap: 10px; font: 600 17px/1.2 var(--display); padding: 0; margin-bottom: 16px; }
+  legend .n { width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-size: 13px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+  .full { grid-column: 1 / -1; }
+  label { display: block; font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  label .opt { font-weight: 400; color: var(--muted); }
+  label .req { color: var(--err); }
+  input[type=text], input[type=tel], input[type=email], input[type=password], textarea {
+    width: 100%; font: inherit; color: var(--fg); background: var(--field);
+    border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px;
+  }
+  textarea { min-height: 140px; resize: vertical; }
+  input:focus, textarea:focus, .drop:focus-within, .choice input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--navy-2) 35%, transparent); border-color: var(--navy-2); }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 5px; display: flex; justify-content: space-between; gap: 8px; }
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; }
+  .choice { position: relative; }
+  .choice input { position: absolute; opacity: 0; }
+  .choice span { display: inline-block; padding: 10px 22px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-weight: 600; background: var(--field); }
+  .choice input:checked + span { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .drop { border: 2px dashed var(--line); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; background: var(--field); transition: border-color .15s; }
+  .drop.over, .drop:hover { border-color: var(--navy-2); }
+  .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .drop strong { color: var(--navy-2); }
+  .file-chip { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; margin-top: 10px; background: var(--field); }
+  .file-chip b { overflow-wrap: anywhere; }
+  .linkbtn { background: none; border: 0; color: var(--err); font: inherit; font-weight: 600; cursor: pointer; }
+  .alert { border-radius: 10px; padding: 12px 14px; margin-top: 18px; font-weight: 600; }
+  .alert.err { background: var(--err-bg); color: var(--err); }
+  .note { background: color-mix(in srgb, var(--gold) 14%, var(--card)); border-left: 4px solid var(--gold); border-radius: 8px; padding: 10px 14px; font-size: 15px; margin-top: 22px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 600 16px/1 var(--display); padding: 15px 26px; border-radius: 10px; border: 0; background: var(--navy); color: #fff; cursor: pointer; text-decoration: none; }
+  .btn:hover { background: #18305A; }
+  .btn.ghost { background: transparent; color: var(--navy-2); border: 1px solid var(--line); }
+  .btn.gold { background: var(--gold); color: #1A1300; }
+  .btn[disabled] { opacity: .6; cursor: wait; }
+  .actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; flex: 1; min-width: 120px; }
+  .progress i { display: block; height: 100%; width: 30%; background: var(--navy-2); animation: slide 1.1s infinite ease-in-out; }
+  @keyframes slide { 0% { margin-left: -30% } 100% { margin-left: 100% } }
+  @media (prefers-reduced-motion: reduce) { .progress i { animation: none; width: 100%; } }
+  .success { text-align: center; padding: 40px 28px; }
+  .tick { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: var(--ok-bg); color: var(--ok); display: grid; place-items: center; font-size: 34px; }
+  .ref { font: 700 28px/1 var(--display); letter-spacing: .04em; color: var(--navy-2); margin: 10px 0; }
+  /* Admin */
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 6px; }
+  .stat { flex: 1; min-width: 130px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stat b { display: block; font: 700 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 14px; }
+  .table-wrap { overflow-x: auto; margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+  th { background: var(--navy); color: #fff; text-align: left; padding: 10px; font-weight: 600; white-space: nowrap; }
+  td { padding: 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.desc { max-width: 280px; color: var(--muted); }
+  td:nth-child(1), td:nth-child(2), td:nth-child(4), td:nth-child(5) { white-space: nowrap; }
+  td a { color: var(--navy-2); font-weight: 600; }
+  .admin-wide { max-width: 1100px; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 0 16px 32px; }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+    form, .panel { padding: 4px 18px 22px; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap" id="hdr">
+    <div class="eyebrow">Université Nongo Conakry · Génie Informatique et Télécommunication</div>
+    <h1 id="title">Enregistrement des projets de soutenance</h1>
+    <p id="subtitle">Remplis ce formulaire pour déclarer ton projet. Si tu travailles en binôme, <b>un seul membre</b> remplit le formulaire pour le projet.</p>
+  </div>
+</header>
+
+<main>
+  <!-- ============ ADMIN : CONNEXION ============ -->
+  <div class="wrap card" id="loginView" hidden>
+    <div class="panel">
+      <fieldset>
+        <legend><span class="n">🔒</span>Espace administrateur</legend>
+        <form id="loginForm" novalidate>
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" autocomplete="current-password">
+          <div class="alert err" id="loginError" hidden></div>
+          <div class="actions"><button class="btn" type="submit" id="loginBtn">Se connecter</button></div>
+        </form>
+      </fieldset>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN : TABLEAU ============ -->
+  <div class="wrap card admin-wide" id="adminView" hidden>
+    <div class="panel">
+      <div class="stats">
+        <div class="stat"><b id="sProjets">0</b><span>projets</span></div>
+        <div class="stat"><b id="sEtudiants">0</b><span>étudiants</span></div>
+        <div class="stat"><b id="sBinomes">0</b><span>en binôme</span></div>
+      </div>
+      <div class="actions">
+        <a class="btn gold" id="excelBtn" href="#">⬇ Télécharger en Excel</a>
+        <a class="btn ghost" id="sheetBtn" href="#">Ouvrir Google Sheets</a>
+        <a class="btn ghost" id="folderBtn" href="#">Dossier des documents</a>
+        <button class="btn ghost" type="button" id="refreshBtn">Actualiser</button>
+      </div>
+      <p class="hint" style="display:block">Le téléchargement Excel et les documents s’ouvrent avec ton compte Google (le propriétaire).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Réf.</th><th>Date</th><th>Étudiant</th><th>Matricule</th><th>Téléphone</th><th>Binôme</th><th>Thème</th><th>Description</th><th>Document</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="empty" hidden style="display:block;text-align:center;padding:18px">Aucun projet enregistré pour l’instant. Les réponses apparaîtront ici dès que les étudiants auront rempli le formulaire.</p>
+    </div>
+  </div>
+</main>
+
+
+<script>
+  var APP_URL = 'https://script.google.com/macros/s/AKfycbyirUK7DKjXfOj-zSxKaC_2JlFcr3D1ueIw3zVVSg4b0MO4xFmMLUzKs4LscLYa2ON5ZQ/exec';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function showError(el, msg) { el.textContent = msg; el.hidden = false; }
+
+  /* ---------- Admin ---------- */
+  var adminPassword = '';
+
+  function td(text, cls) { var c = document.createElement('td'); if (cls) c.className = cls; c.textContent = text; return c; }
+
+  function renderAdmin(data) {
+    $('loginView').hidden = true; $('adminView').hidden = false;
+    $('excelBtn').href = data.excelUrl; $('sheetBtn').href = data.sheetUrl; $('folderBtn').href = data.folderUrl;
+    var rows = data.rows, tbody = $('rows'), duo = 0;
+    tbody.innerHTML = '';
+    rows.slice().reverse().forEach(function (r) {
+      if (r.binome === 'Oui') duo++;
+      var tr = document.createElement('tr');
+      tr.appendChild(td(r.ref));
+      tr.appendChild(td(r.date));
+      tr.appendChild(td(r.nom + ' ' + r.prenom));
+      tr.appendChild(td(r.matricule));
+      tr.appendChild(td(r.telephone));
+      tr.appendChild(td(r.binome === 'Oui' ? r.binomeNom + ' ' + r.binomePrenom + ' · ' + r.binomeMatricule + ' · ' + r.binomeTelephone : '—'));
+      tr.appendChild(td(r.theme));
+      tr.appendChild(td(r.description.length > 160 ? r.description.slice(0, 160) + '…' : r.description, 'desc'));
+      var dc = document.createElement('td');
+      if (r.docUrl) { var a = document.createElement('a'); a.href = r.docUrl; a.textContent = 'Ouvrir'; a.target = '_blank'; dc.appendChild(a); }
+      tr.appendChild(dc);
+      tbody.appendChild(tr);
+    });
+    $('sProjets').textContent = rows.length;
+    $('sEtudiants').textContent = rows.length + duo;
+    $('sBinomes').textContent = duo;
+    $('empty').hidden = rows.length > 0;
+  }
+
+  function loadAdmin(btn) {
+    btn.disabled = true;
+    fetch(APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin', password: adminPassword })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        btn.disabled = false;
+        if (!res.ok) throw new Error(res.error);
+        renderAdmin(res.data);
+      })
+      .catch(function (er) {
+        btn.disabled = false;
+        $('adminView').hidden = true; $('loginView').hidden = false;
+        showError($('loginError'), er && er.message && er.message !== 'Failed to fetch' ? er.message : 'Connexion impossible. Vérifie ta connexion internet.');
+      });
+  }
+
+  function initAdmin() {
+    $('title').textContent = 'Espace administrateur';
+    $('subtitle').textContent = 'Consulte les projets enregistrés et télécharge-les en Excel.';
+    $('loginView').hidden = false;
+    $('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault(); $('loginError').hidden = true;
+      adminPassword = $('password').value;
+      if (!adminPassword) { showError($('loginError'), 'Entre le mot de passe.'); return; }
+      loadAdmin($('loginBtn'));
+    });
+    $('refreshBtn').addEventListener('click', function () { loadAdmin(this); });
+  }
+
+  initAdmin();
+</script>
+</body>
+</html>
