@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projets de soutenance – GIT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout : une colonne centrée, en-tête bleu UNC, carte de formulaire en sections numérotées */
+  :root {
+    --navy: #1F3864; --navy-2: #2B4C85; --gold: #C8962E;
+    --bg: #F3F5F9; --card: #FFFFFF; --fg: #1A2233; --muted: #5B6578;
+    --line: #DCE1EA; --field: #FBFCFE; --ok: #2F7A4A; --ok-bg: #E5F3EA;
+    --err: #A33030; --err-bg: #FBE9E9;
+    --display: 'Lexend', 'Segoe UI', system-ui, sans-serif;
+    --body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F1522; --card: #172033; --fg: #E6EAF2; --muted: #9AA4B8;
+      --line: #2A3650; --field: #111A2A; --ok: #7FD39C; --ok-bg: #16301F;
+      --err: #F08A8A; --err-bg: #3A1A1A; --navy-2: #8FB0EE; color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+  header { background: var(--navy); color: #fff; padding: 28px 16px 64px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .eyebrow { font: 600 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  h1 { font: 700 clamp(24px, 5vw, 32px)/1.15 var(--display); margin: 10px 0 8px; text-wrap: balance; }
+  header p { margin: 0; color: #C9D3E6; max-width: 60ch; }
+  main { padding: 0 16px 48px; margin-top: -40px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 28px rgba(15,25,50,.08); }
+  form, .panel { padding: 8px 28px 28px; }
+  fieldset { border: 0; margin: 0; padding: 22px 0 6px; border-bottom: 1px solid var(--line); }
+  fieldset:last-of-type { border-bottom: 0; }
+  legend { display: flex; align-items: center; gap: 10px; font: 600 17px/1.2 var(--display); padding: 0; margin-bottom: 16px; }
+  legend .n { width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-size: 13px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+  .full { grid-column: 1 / -1; }
+  label { display: block; font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  label .opt { font-weight: 400; color: var(--muted); }
+  label .req { color: var(--err); }
+  input[type=text], input[type=tel], input[type=email], input[type=password], textarea {
+    width: 100%; font: inherit; color: var(--fg); background: var(--field);
+    border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px;
+  }
+  textarea { min-height: 140px; resize: vertical; }
+  input:focus, textarea:focus, .drop:focus-within, .choice input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--navy-2) 35%, transparent); border-color: var(--navy-2); }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 5px; display: flex; justify-content: space-between; gap: 8px; }
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; }
+  .choice { position: relative; }
+  .choice input { position: absolute; opacity: 0; }
+  .choice span { display: inline-block; padding: 10px 22px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-weight: 600; background: var(--field); }
+  .choice input:checked + span { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .drop { border: 2px dashed var(--line); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; background: var(--field); transition: border-color .15s; }
+  .drop.over, .drop:hover { border-color: var(--navy-2); }
+  .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .drop strong { color: var(--navy-2); }
+  .file-chip { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; margin-top: 10px; background: var(--field); }
+  .file-chip b { overflow-wrap: anywhere; }
+  .linkbtn { background: none; border: 0; color: var(--err); font: inherit; font-weight: 600; cursor: pointer; }
+  .alert { border-radius: 10px; padding: 12px 14px; margin-top: 18px; font-weight: 600; }
+  .alert.err { background: var(--err-bg); color: var(--err); }
+  .note { background: color-mix(in srgb, var(--gold) 14%, var(--card)); border-left: 4px solid var(--gold); border-radius: 8px; padding: 10px 14px; font-size: 15px; margin-top: 22px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 600 16px/1 var(--display); padding: 15px 26px; border-radius: 10px; border: 0; background: var(--navy); color: #fff; cursor: pointer; text-decoration: none; }
+  .btn:hover { background: #18305A; }
+  .btn.ghost { background: transparent; color: var(--navy-2); border: 1px solid var(--line); }
+  .btn.gold { background: var(--gold); color: #1A1300; }
+  .btn[disabled] { opacity: .6; cursor: wait; }
+  .actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; flex: 1; min-width: 120px; }
+  .progress i { display: block; height: 100%; width: 30%; background: var(--navy-2); animation: slide 1.1s infinite ease-in-out; }
+  @keyframes slide { 0% { margin-left: -30% } 100% { margin-left: 100% } }
+  @media (prefers-reduced-motion: reduce) { .progress i { animation: none; width: 100%; } }
+  .success { text-align: center; padding: 40px 28px; }
+  .tick { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: var(--ok-bg); color: var(--ok); display: grid; place-items: center; font-size: 34px; }
+  .ref { font: 700 28px/1 var(--display); letter-spacing: .04em; color: var(--navy-2); margin: 10px 0; }
+  /* Admin */
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 6px; }
+  .stat { flex: 1; min-width: 130px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stat b { display: block; font: 700 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 14px; }
+  .table-wrap { overflow-x: auto; margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+  th { background: var(--navy); color: #fff; text-align: left; padding: 10px; font-weight: 600; white-space: nowrap; }
+  td { padding: 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.desc { max-width: 280px; color: var(--muted); }
+  td:nth-child(1), td:nth-child(2), td:nth-child(4) { white-space: nowrap; }
+  td a { color: var(--navy-2); font-weight: 600; }
+  .admin-wide { max-width: 1100px; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 0 16px 32px; }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+    form, .panel { padding: 4px 18px 22px; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap" id="hdr">
+    <div class="eyebrow">Université Nongo Conakry · Génie Informatique et Télécommunication</div>
+    <h1 id="title">Enregistrement des projets de soutenance</h1>
+    <p id="subtitle">Remplis ce formulaire pour déclarer ton projet. Si tu travailles en binôme, <b>un seul membre</b> remplit le formulaire pour le projet.</p>
+  </div>
+</header>
+
+<main>
+  <!-- ============ FORMULAIRE ÉTUDIANT ============ -->
+  <div class="wrap card" id="formView" hidden>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend><span class="n">1</span>Toi</legend>
+        <div class="grid">
+          <div><label for="nom">Nom <span class="req">*</span></label><input type="text" id="nom" autocomplete="family-name" required></div>
+          <div><label for="prenom">Prénom <span class="req">*</span></label><input type="text" id="prenom" autocomplete="given-name" required></div>
+          <div><label for="telephone">Numéro WhatsApp <span class="req">*</span></label><input type="tel" id="telephone" placeholder="6XX XX XX XX" autocomplete="tel" required></div>
+          <div><label for="email">Email <span class="opt">(facultatif)</span></label><input type="email" id="email" autocomplete="email"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="n">2</span>Binôme</legend>
+        <label>Travailles-tu en binôme ? <span class="req">*</span></label>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="binome" id="binomeOui" value="Oui"><span>Oui</span></label>
+          <label class="choice"><input type="radio" name="binome" id="binomeNon" value="Non"><span>Non, seul(e)</span></label>
+        </div>
+        <div class="grid" id="binomeFields" hidden style="margin-top:16px">
+          <div><label for="binomeNom">Nom du binôme <span class="req">*</span></label><input type="text" id="binomeNom"></div>
+          <div><label for="binomePrenom">Prénom du binôme <span class="req">*</span></label><input type="text" id="binomePrenom"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="n">3</span>Projet</legend>
+        <div class="grid">
+          <div class="full"><label for="theme">Thème / nom du projet <span class="req">*</span></label><input type="text" id="theme" maxlength="200" placeholder="Ex. : Application de gestion des inscriptions universitaires"></div>
+          <div class="full">
+            <label for="description">Description du projet <span class="req">*</span></label>
+            <textarea id="description" maxlength="3000" placeholder="Objectif du projet, problème résolu, technologies utilisées…"></textarea>
+            <div class="hint"><span>Au moins 20 caractères.</span><span id="count">0 / 3000</span></div>
+          </div>
+          <div class="full">
+            <label for="file">Document explicatif <span class="req">*</span></label>
+            <label class="drop" id="drop" for="file">
+              <input type="file" id="file" accept=".pdf,.doc,.docx,.ppt,.pptx">
+              <div><strong>Choisir un fichier</strong> ou le glisser ici</div>
+              <div class="hint" style="justify-content:center">PDF, Word ou PowerPoint · 10 Mo maximum</div>
+            </label>
+            <div class="file-chip" id="chip" hidden><b id="chipName"></b><button type="button" class="linkbtn" id="chipRemove">Retirer</button></div>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="alert err" id="formError" hidden></div>
+      <div class="actions">
+        <button class="btn" type="submit" id="submitBtn">Envoyer mon projet</button>
+        <div class="progress" id="progress" hidden><i></i></div>
+        <span class="hint" id="progressText" hidden>Envoi en cours, ne ferme pas la page…</span>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ CONFIRMATION ============ -->
+  <div class="wrap card success" id="successView" hidden>
+    <div class="tick">✓</div>
+    <h2 style="font-family:var(--display);margin:0">Projet bien enregistré</h2>
+    <p style="color:var(--muted);margin:6px 0 0">Ton numéro de référence :</p>
+    <div class="ref" id="refOut"></div>
+    <p style="color:var(--muted);max-width:46ch;margin:0 auto">Fais une capture d’écran de cette page. Si tu as fait une erreur, contacte le chef de classe avec ta référence.</p>
+    <div class="actions" style="justify-content:center"><button class="btn ghost" type="button" id="againBtn">Enregistrer un autre projet</button></div>
+  </div>
+
+</main>
+
+
+<script>
+  var APP_URL = 'https://script.google.com/macros/s/AKfycbyirUK7DKjXfOj-zSxKaC_2JlFcr3D1ueIw3zVVSg4b0MO4xFmMLUzKs4LscLYa2ON5ZQ/exec';
+  var MAX_MB = 10;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- Formulaire ---------- */
+  var selectedFile = null;
+
+  function showError(el, msg) { el.textContent = msg; el.hidden = false; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+  function setFile(f) {
+    $('formError').hidden = true;
+    if (!f) { selectedFile = null; $('chip').hidden = true; $('drop').hidden = false; $('file').value = ''; return; }
+    var ext = f.name.split('.').pop().toLowerCase();
+    if (['pdf', 'doc', 'docx', 'ppt', 'pptx'].indexOf(ext) === -1) { showError($('formError'), 'Format refusé. Envoie un PDF, un Word ou un PowerPoint.'); return; }
+    if (f.size > MAX_MB * 1024 * 1024) { showError($('formError'), 'Le fichier fait ' + (f.size / 1048576).toFixed(1) + ' Mo. Le maximum est ' + MAX_MB + ' Mo.'); return; }
+    selectedFile = f;
+    $('chipName').textContent = f.name + ' · ' + (f.size / 1048576).toFixed(1) + ' Mo';
+    $('chip').hidden = false; $('drop').hidden = true;
+  }
+
+  function readBase64(f) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result).split(',')[1]); };
+      r.onerror = function () { reject(new Error('Impossible de lire le fichier.')); };
+      r.readAsDataURL(f);
+    });
+  }
+
+  function val(id) { return $(id).value.trim(); }
+
+  function validate() {
+    if (!val('nom') || !val('prenom')) return ['nom', 'Indique ton nom et ton prénom.'];
+    if (!/^[+\d][\d\s]{7,}$/.test(val('telephone'))) return ['telephone', 'Indique un numéro WhatsApp valide.'];
+    if (val('email') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email'))) return ['email', 'L’adresse email n’est pas valide.'];
+    var b = document.querySelector('input[name=binome]:checked');
+    if (!b) return ['binomeOui', 'Indique si tu travailles en binôme.'];
+    if (b.value === 'Oui' && (!val('binomeNom') || !val('binomePrenom'))) return ['binomeNom', 'Indique le nom et le prénom de ton binôme.'];
+    if (!val('theme')) return ['theme', 'Indique le thème du projet.'];
+    if (val('description').length < 20) return ['description', 'La description doit faire au moins 20 caractères.'];
+    if (!selectedFile) return ['file', 'Ajoute le document explicatif du projet.'];
+    return null;
+  }
+
+  function setBusy(busy) {
+    $('submitBtn').disabled = busy;
+    $('submitBtn').textContent = busy ? 'Envoi…' : 'Envoyer mon projet';
+    $('progress').hidden = !busy; $('progressText').hidden = !busy;
+  }
+
+  function initForm() {
+    $('formView').hidden = false;
+    Array.prototype.forEach.call(document.querySelectorAll('input[name=binome]'), function (r) {
+      r.addEventListener('change', function () { $('binomeFields').hidden = r.value !== 'Oui' || !r.checked; });
+    });
+    $('description').addEventListener('input', function () { $('count').textContent = this.value.length + ' / 3000'; });
+    $('file').addEventListener('change', function () { setFile(this.files[0]); });
+    $('chipRemove').addEventListener('click', function () { setFile(null); });
+    var drop = $('drop');
+    ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+    ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
+    drop.addEventListener('drop', function (e) { if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+
+    $('form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      $('formError').hidden = true;
+      var err = validate();
+      if (err) { showError($('formError'), err[1]); var f = $(err[0]); if (f && f.focus) f.focus(); return; }
+      setBusy(true);
+      readBase64(selectedFile).then(function (b64) {
+        var b = document.querySelector('input[name=binome]:checked').value;
+        var payload = {
+          nom: val('nom'), prenom: val('prenom'), telephone: val('telephone'), email: val('email'),
+          binome: b, binomeNom: val('binomeNom'), binomePrenom: val('binomePrenom'),
+          theme: val('theme'), description: val('description'),
+          file: { name: selectedFile.name, type: selectedFile.type, base64: b64 }
+        };
+        fetch(APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'submit', data: payload })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            setBusy(false);
+            if (!res.ok) { showError($('formError'), res.error); return; }
+            $('formView').hidden = true; $('successView').hidden = false;
+            $('refOut').textContent = res.ref;
+            window.scrollTo(0, 0);
+          })
+          .catch(function () {
+            setBusy(false);
+            showError($('formError'), 'L’envoi a échoué. Vérifie ta connexion internet et réessaie.');
+          });
+      }).catch(function (er) { setBusy(false); showError($('formError'), er.message); });
+    });
+
+    $('againBtn').addEventListener('click', function () {
+      $('form').reset(); setFile(null); $('binomeFields').hidden = true; $('count').textContent = '0 / 3000';
+      $('successView').hidden = true; $('formView').hidden = false; window.scrollTo(0, 0);
+    });
+  }
+
+  initForm();
+</script>
+</body>
+</html>
