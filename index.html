@@ -118,8 +118,9 @@
         <div class="grid">
           <div><label for="nom">Nom <span class="req">*</span></label><input type="text" id="nom" autocomplete="family-name" required></div>
           <div><label for="prenom">Prénom <span class="req">*</span></label><input type="text" id="prenom" autocomplete="given-name" required></div>
+          <div><label for="matricule">Matricule <span class="req">*</span></label><input type="text" id="matricule" required></div>
           <div><label for="telephone">Numéro WhatsApp <span class="req">*</span></label><input type="tel" id="telephone" placeholder="6XX XX XX XX" autocomplete="tel" required></div>
-          <div><label for="email">Email <span class="opt">(facultatif)</span></label><input type="email" id="email" autocomplete="email"></div>
+          <div class="full"><label for="email">Email <span class="opt">(facultatif)</span></label><input type="email" id="email" autocomplete="email"></div>
         </div>
       </fieldset>
 
@@ -133,6 +134,8 @@
         <div class="grid" id="binomeFields" hidden style="margin-top:16px">
           <div><label for="binomeNom">Nom du binôme <span class="req">*</span></label><input type="text" id="binomeNom"></div>
           <div><label for="binomePrenom">Prénom du binôme <span class="req">*</span></label><input type="text" id="binomePrenom"></div>
+          <div><label for="binomeMatricule">Matricule du binôme <span class="req">*</span></label><input type="text" id="binomeMatricule"></div>
+          <div><label for="binomeTelephone">Numéro WhatsApp du binôme <span class="req">*</span></label><input type="tel" id="binomeTelephone" placeholder="6XX XX XX XX"></div>
         </div>
       </fieldset>
 
@@ -213,11 +216,14 @@
 
   function validate() {
     if (!val('nom') || !val('prenom')) return ['nom', 'Indique ton nom et ton prénom.'];
+    if (!val('matricule')) return ['matricule', 'Indique ton matricule.'];
     if (!/^[+\d][\d\s]{7,}$/.test(val('telephone'))) return ['telephone', 'Indique un numéro WhatsApp valide.'];
     if (val('email') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email'))) return ['email', 'L’adresse email n’est pas valide.'];
     var b = document.querySelector('input[name=binome]:checked');
     if (!b) return ['binomeOui', 'Indique si tu travailles en binôme.'];
     if (b.value === 'Oui' && (!val('binomeNom') || !val('binomePrenom'))) return ['binomeNom', 'Indique le nom et le prénom de ton binôme.'];
+    if (b.value === 'Oui' && !val('binomeMatricule')) return ['binomeMatricule', 'Indique le matricule de ton binôme.'];
+    if (b.value === 'Oui' && !/^[+\d][\d\s]{7,}$/.test(val('binomeTelephone'))) return ['binomeTelephone', 'Indique un numéro WhatsApp valide pour ton binôme.'];
     if (!val('theme')) return ['theme', 'Indique le thème du projet.'];
     if (val('description').length < 20) return ['description', 'La description doit faire au moins 20 caractères.'];
     if (!selectedFile) return ['file', 'Ajoute le document explicatif du projet.'];
@@ -252,8 +258,9 @@
       readBase64(selectedFile).then(function (b64) {
         var b = document.querySelector('input[name=binome]:checked').value;
         var payload = {
-          nom: val('nom'), prenom: val('prenom'), telephone: val('telephone'), email: val('email'),
+          nom: val('nom'), prenom: val('prenom'), matricule: val('matricule'), telephone: val('telephone'), email: val('email'),
           binome: b, binomeNom: val('binomeNom'), binomePrenom: val('binomePrenom'),
+          binomeMatricule: val('binomeMatricule'), binomeTelephone: val('binomeTelephone'),
           theme: val('theme'), description: val('description'),
           file: { name: selectedFile.name, type: selectedFile.type, base64: b64 }
         };
